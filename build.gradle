@@ -35,6 +35,7 @@ dependencies {
     // DB
     testRuntimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.hibernate.orm:hibernate-spatial'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
@@ -43,6 +44,9 @@ dependencies {
     // Test
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+
+    // Jackson
+    implementation 'org.n52.jackson:jackson-datatype-jts:1.2.10'
 }
 
 tasks.named('test') {

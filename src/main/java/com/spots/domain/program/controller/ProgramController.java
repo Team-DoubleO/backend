@@ -1,0 +1,35 @@
+package com.spots.domain.program.controller;
+
+import com.spots.domain.program.dto.request.ProgramInfoRequest;
+import com.spots.domain.program.dto.response.ProgramDetailInfoResponse;
+import com.spots.domain.program.dto.response.ProgramInfoResponse;
+import com.spots.domain.program.service.ProgramService;
+import com.spots.global.exception.ApiResponse;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/programs")
+public class ProgramController {
+
+  private final ProgramService programService;
+
+  @PostMapping
+  public ApiResponse<List<ProgramInfoResponse>> getPrograms(@RequestBody ProgramInfoRequest request) {
+    List<ProgramInfoResponse> responses = programService.getPrograms(request.toServiceRequest());
+    return ApiResponse.success(responses);
+  }
+
+  @GetMapping("/{programId}")
+  public ApiResponse<ProgramDetailInfoResponse> getProgram(@PathVariable Long programId) {
+    ProgramDetailInfoResponse response = programService.getProgram(programId);
+    return ApiResponse.success(response);
+  }
+}

@@ -80,6 +80,7 @@ issue_new_certificate() {
       --webroot --webroot-path=/var/www/certbot \
       -d sspots.site \
       -d www.sspots.site \
+      -d api.sspots.site \
       --email $CERTBOT_EMAIL --agree-tos --no-eff-email
 
     if [ $? -ne 0 ]; then

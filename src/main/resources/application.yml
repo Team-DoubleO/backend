@@ -22,3 +22,12 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+
+front:
+  server: ${FRONT.SERVER.URL}
+
+back:
+  server:
+    local: ${BACK.SERVER.LOCAL.URL}
+    prod: ${BACK.SERVER.PROD.URL}
+    api: ${BACK.SERVER.API.URL}

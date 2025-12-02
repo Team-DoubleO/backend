@@ -1,5 +1,7 @@
 package com.spots.domain.program.entity;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import com.spots.domain.category.entity.ProgramTargetRel;
 import com.spots.domain.facility.entity.Facility;
 import jakarta.persistence.Column;
@@ -12,10 +14,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Comparator;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "program")
+@NoArgsConstructor(access = PROTECTED)
 public class Program {
 
   @Id
@@ -57,5 +64,21 @@ public class Program {
 
   @OneToMany(mappedBy = "program", fetch = FetchType.LAZY)
   private List<ProgramTargetRel> targetCategories;
+
+  public static List<String> splitAndSortDays(String days) {
+    if (days == null || days.isBlank()) {
+      return List.of();
+    }
+
+    List<String> raw = days.chars()
+        .mapToObj(c -> String.valueOf((char) c))
+        .toList();
+
+    List<String> order = List.of("월", "화", "수", "목", "금", "토", "일");
+
+    return raw.stream()
+        .sorted(Comparator.comparingInt(order::indexOf))
+        .toList();
+  }
 
 }

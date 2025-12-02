@@ -1,5 +1,7 @@
 package com.spots.domain.transport.entity;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import com.spots.domain.facility.entity.Facility;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,9 +12,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "facility_transit")
+@NoArgsConstructor(access = PROTECTED)
 public class FacilityTransit {
 
   @Id
@@ -36,8 +42,8 @@ public class FacilityTransit {
 
   private String bstpSubwaystNm;
 
-  private String pbtrnspFcltyLa;
+  private Double pbtrnspFcltyLa;
 
-  private String pbtrnspFcltyLo;
+  private Double pbtrnspFcltyLo;
 
 }

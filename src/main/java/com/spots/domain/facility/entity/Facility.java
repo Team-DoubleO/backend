@@ -1,5 +1,7 @@
 package com.spots.domain.facility.entity;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import com.spots.domain.program.entity.Program;
 import com.spots.domain.transport.entity.FacilityTransit;
 import jakarta.persistence.Column;
@@ -9,10 +11,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "facility")
-public class Facility { // 클래스명 변경
+@NoArgsConstructor(access = PROTECTED)
+public class Facility {
 
   @Id
   @Column(name = "facility_id")
@@ -44,9 +50,9 @@ public class Facility { // 클래스명 변경
 
   private String fcltyTelNo;
 
-  private String fcltyLa;
+  private Double fcltyLa;
 
-  private String fcltyLo;
+  private Double fcltyLo;
 
   @OneToMany(mappedBy = "facility", fetch = FetchType.LAZY)
   private List<Program> programs;

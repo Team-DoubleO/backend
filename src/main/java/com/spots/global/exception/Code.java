@@ -8,7 +8,13 @@ import lombok.Getter;
 public enum Code {
 
   // SUCCESS
-  OK("SUCCESS", "프로그램 상세 페이지 조회에 성공했습니다.");
+  OK("SUCCESS", "요청에 성공했습니다."),
+
+  // Program
+  NOT_FOUND_PROGRAM("NOT_FOUND_PROGRAM", "존재하지 않는 프로그램입니다."),
+
+  // Facility
+  NOT_FOUND_FACILITY("NOT_FOUND_FACILITY", "존재하지 않는 시설입니다.");
 
   private final String status;
   private final String message;

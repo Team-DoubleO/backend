@@ -1,0 +1,22 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    driver-class-name: ${DB.PROD.DRIVER-CLASS-NAME}
+    url: ${DB.PROD.URL}
+    username: ${DB.PROD.USERNAME}
+    password: ${DB.PROD.PASSWORD}
+
+front:
+  server: ${FRONT.SERVER.URL}
+
+back:
+  server:
+    local: ${BACK.SERVER.LOCAL.URL}
+    prod: ${BACK.SERVER.PROD.URL}
+    api: ${BACK.SERVER.API.URL}
+
+swagger:
+  server-url: ${BACK.SERVER.LOCAL.URL}

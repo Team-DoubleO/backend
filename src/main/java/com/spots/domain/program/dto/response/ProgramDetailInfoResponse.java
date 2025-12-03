@@ -17,7 +17,7 @@ public record ProgramDetailInfoResponse(
     String subCategory,
     String facility,
     String facilityAddress,
-    List<TransportData> transportDatumRaws
+    List<TransportData> transportData
 ) {
 
   public static ProgramDetailInfoResponse from(Program program, Facility facility, List<TransportDataRaw> transportDataRaws) {
@@ -35,6 +35,7 @@ public record ProgramDetailInfoResponse(
         facility.getFcltyAddr(),
         transportDataRaws.stream()
             .map(data -> new TransportData(
+                data.transportName(),
                 data.transportName(),
                 data.transportTime().longValue()
             )).toList()

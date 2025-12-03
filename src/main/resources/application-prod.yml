@@ -10,7 +10,9 @@ spring:
     password: ${DB.PROD.PASSWORD}
 
 front:
-  server: ${FRONT.SERVER.URL}
+  server:
+    local: ${FRONT.SERVER.LOCAL.URL}
+    prod: ${FRONT.SERVER.PROD.URL}
 
 back:
   server:

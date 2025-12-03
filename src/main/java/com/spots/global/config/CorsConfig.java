@@ -8,8 +8,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
-  @Value("${front.server}")
-  private String FRONT_SERVER;
+  @Value("${front.server.local}")
+  private String FRONT_LOCAL_SERVER;
+
+  @Value("${front.server.prod}")
+  private String FRONT_PROD_SERVER;
 
   @Value("${back.server.local}")
   private String BACK_LOCAL_SERVER;
@@ -24,7 +27,8 @@ public class CorsConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/api/v1/**")
         .allowedOriginPatterns(
-            FRONT_SERVER,
+            FRONT_LOCAL_SERVER,
+            FRONT_PROD_SERVER,
             BACK_API_SERVER,
             BACK_PROD_SERVER,
             BACK_LOCAL_SERVER

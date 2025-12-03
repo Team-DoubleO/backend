@@ -35,7 +35,7 @@ public record ProgramDetailInfoResponse(
         facility.getFcltyAddr(),
         transportDataRaws.stream()
             .map(data -> new TransportData(
-                data.transportName(),
+                data.transportType(),
                 data.transportName(),
                 data.transportTime().longValue()
             )).toList()

@@ -5,6 +5,7 @@ import com.spots.domain.program.dto.response.ProgramDetailInfoResponse;
 import com.spots.domain.program.dto.response.ProgramInfoResponse;
 import com.spots.domain.program.service.ProgramService;
 import com.spots.global.exception.ApiResponse;
+import com.spots.swagger.program.ProgramControllerDocs;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/programs")
-public class ProgramController {
+public class ProgramController implements ProgramControllerDocs {
 
   private final ProgramService programService;
 

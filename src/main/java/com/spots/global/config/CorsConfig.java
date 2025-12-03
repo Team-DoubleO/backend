@@ -25,7 +25,7 @@ public class CorsConfig implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/v1/**")
+    registry.addMapping("/**")
         .allowedOriginPatterns(
             FRONT_LOCAL_SERVER,
             FRONT_PROD_SERVER,

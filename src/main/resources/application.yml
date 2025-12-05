@@ -28,3 +28,4 @@ server:
 
 gms:
   api-key: ${GMS.API-KEY}
+  base-url: ${GMS.BASE-URL}

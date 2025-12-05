@@ -35,4 +35,10 @@ public class ApiResponse<T> {
         .data(false).build();
   }
 
+  public static ApiResponse<Boolean> error(Code errorCode, String errorMessage) {
+    return new ApiResponseBuilder<Boolean>()
+        .status(errorCode.getStatus())
+        .message(errorMessage)
+        .data(false).build();
+  }
 }

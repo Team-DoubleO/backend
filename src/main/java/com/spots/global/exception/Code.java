@@ -14,7 +14,10 @@ public enum Code {
   NOT_FOUND_PROGRAM("NOT_FOUND_PROGRAM", "존재하지 않는 프로그램입니다."),
 
   // Facility
-  NOT_FOUND_FACILITY("NOT_FOUND_FACILITY", "존재하지 않는 시설입니다.");
+  NOT_FOUND_FACILITY("NOT_FOUND_FACILITY", "존재하지 않는 시설입니다."),
+
+  // User Input Error
+  EMPTY_REQUEST_INPUT("EMPTY_REQUEST_INPUT", "입력값이 비어있습니다.");
 
   private final String status;
   private final String message;

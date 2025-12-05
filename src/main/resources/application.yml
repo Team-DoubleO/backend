@@ -16,5 +16,16 @@ spring:
         format_sql: true
     open-in-view: false
 
+  ai:
+    openai:
+      api-key: ${OPENAI.API-KEY}
+      chat:
+        options:
+          model: gpt-4o
+
 server:
   forward-headers-strategy: framework
+
+gms:
+  api-key: ${GMS.API-KEY}
+  base-url: ${GMS.BASE-URL}

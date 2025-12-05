@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,73 @@ public interface ProgramControllerDocs {
       summary = "카테고리 기반 프로그램 동적 조회 API",
       description = "유저가 선택한 카테고리 및 위치 기반 조건을 토대로 프로그램 목록을 조회합니다."
   )
+  @ApiResponses({
+      @io.swagger.v3.oas.annotations.responses.ApiResponse(
+          responseCode = "200",
+          description = "요청 데이터 검증 실패",
+          content = @Content(
+              schema = @Schema(implementation = ApiResponse.class),
+              examples = {
+                  @ExampleObject(
+                      name = "gender 누락",
+                      description = "성별 값이 없을 때 발생하는 오류",
+                      value = """
+                          {
+                              "status": "EMPTY_REQUEST_INPUT",
+                              "message": "성별은 필수 입력값입니다.",
+                              "data": false
+                          }
+                          """
+                  ),
+                  @ExampleObject(
+                      name = "age 누락",
+                      description = "연령대 값이 없을 때 발생하는 오류",
+                      value = """
+                          {
+                              "status": "EMPTY_REQUEST_INPUT",
+                              "message": "연령대는 필수 입력값입니다.",
+                              "data": false
+                          }
+                          """
+                  ),
+                  @ExampleObject(
+                      name = "latitude 누락",
+                      description = "위도 값이 없을 때 발생하는 오류",
+                      value = """
+                          {
+                              "status": "EMPTY_REQUEST_INPUT",
+                              "message": "위도는 필수 입력값입니다.",
+                              "data": false
+                          }
+                          """
+                  ),
+                  @ExampleObject(
+                      name = "longitude 누락",
+                      description = "경도 값이 없을 때 발생하는 오류",
+                      value = """
+                          {
+                              "status": "EMPTY_REQUEST_INPUT",
+                              "message": "경도는 필수 입력값입니다.",
+                              "data": false
+                          }
+                          """
+                  ),
+                  @ExampleObject(
+                      name = "favorites 비어 있음",
+                      description = "선호 운동 리스트가 비어 있을 때 발생하는 오류",
+                      value = """
+                          {
+                              "status": "EMPTY_REQUEST_INPUT",
+                              "message": "선호 운동 종목 리스트는 비어 있을 수 없습니다.",
+                              "data": false
+                          }
+                          """
+                  )
+              }
+          )
+      )
+  })
+
   @io.swagger.v3.oas.annotations.parameters.RequestBody(
       description = "프로그램 필터링 조건",
       required = true,

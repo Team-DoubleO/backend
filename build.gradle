@@ -47,7 +47,6 @@ dependencies {
     // DB
     testRuntimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
-//    implementation 'org.hibernate.orm:hibernate-spatial'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

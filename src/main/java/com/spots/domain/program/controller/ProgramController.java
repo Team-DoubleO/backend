@@ -6,6 +6,7 @@ import com.spots.domain.program.dto.response.ProgramInfoResponse;
 import com.spots.domain.program.service.ProgramService;
 import com.spots.global.exception.ApiResponse;
 import com.spots.swagger.program.ProgramControllerDocs;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,7 @@ public class ProgramController implements ProgramControllerDocs {
 
   @PostMapping
   public ApiResponse<List<ProgramInfoResponse>> searchPrograms(
-      @RequestBody ProgramInfoRequest request,
+      @Valid @RequestBody ProgramInfoRequest request,
       @RequestParam("pageSize") Long pageSize,
       @RequestParam(value = "lastProgramId", required = false) Long lastProgramId
   ) {

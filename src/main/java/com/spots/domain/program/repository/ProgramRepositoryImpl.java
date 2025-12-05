@@ -37,7 +37,7 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
     }
 
     NumberExpression<Double> distanceKm = null;
-    double radius = 100.0;
+    double radius = 30.0;
 
     if (req.latitude() != null && req.longitude() != null) {
 

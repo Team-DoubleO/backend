@@ -17,8 +17,9 @@ front:
 back:
   server:
     local: ${BACK.SERVER.LOCAL.URL}
-    prod: ${BACK.SERVER.PROD.URL}
     api: ${BACK.SERVER.API.URL}
+    prod-1: ${BACK.SERVER.PROD-1.URL}
+    prod-2: ${BACK.SERVER.PROD-2.URL}
 
 swagger:
   server-url: ${BACK.SERVER.API.URL}

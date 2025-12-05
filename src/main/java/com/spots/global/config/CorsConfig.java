@@ -20,8 +20,11 @@ public class CorsConfig implements WebMvcConfigurer {
   @Value("${back.server.api}")
   private String BACK_API_SERVER;
 
-  @Value("${back.server.prod}")
-  private String BACK_PROD_SERVER;
+  @Value("${back.server.prod-1}")
+  private String BACK_PROD_1_SERVER;
+
+  @Value("${back.server.prod-2}")
+  private String BACK_PROD_2_SERVER;
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
@@ -30,8 +33,9 @@ public class CorsConfig implements WebMvcConfigurer {
             FRONT_LOCAL_SERVER,
             FRONT_PROD_SERVER,
             BACK_API_SERVER,
-            BACK_PROD_SERVER,
-            BACK_LOCAL_SERVER
+            BACK_LOCAL_SERVER,
+            BACK_PROD_1_SERVER,
+            BACK_PROD_2_SERVER
         )
         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
         .allowedHeaders("*")

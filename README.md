@@ -37,7 +37,10 @@ FitFinder는 공공 데이터를 활용해 누구나 자연스럽게 운동을 �
 - `local`: 로컬 개발용, `.env`와 `application-secret.yml`을 통해 DB/OpenAI 키 주입
 - `prod`: Docker Compose 및 EC2 배포에서 사용, `.env`와 Secrets로 환경 분리
 
-## 4. 채택한 개발 기술
+## 4. 아키텍처 구조
+![architecture](img/architecture.png)
+
+## 5. 채택한 개발 기술
 
 - **Spring Web + Validation**: REST API, DTO 검증
 - **Spring Data JPA + Querydsl 5**: 동적 조건 검색(`ProgramRepositoryImpl`)과 Slice + 커서 기반 무한 스크롤 페이징
@@ -48,7 +51,7 @@ FitFinder는 공공 데이터를 활용해 누구나 자연스럽게 운동을 �
 - **CI/CD**: GitHub Actions `CI.yml` 빌드 & 도커 푸시, `CD.yml` EC2 자동 배포
 - **Infra Scripts**: `scripts/deploy.sh`로 SSL 발급/갱신 + 서비스 롤링
 
-## 5. 프로젝트 구조
+## 6. 프로젝트 구조
 
 ```
 spots/
@@ -77,7 +80,7 @@ spots/
 └── .github/workflows/CI.yml, CD.yml
 ```
 
-## 6. 개발한 기능 설명
+## 7. 개발한 기능 설명
 
 1. **프로그램 조건 검색 API (`ProgramController#searchPrograms`)**
     - 입력: 성별, 연령, 좌표, 선호 종목, 요일, 시간, 페이지 파라미터.
@@ -94,7 +97,7 @@ spots/
     - GitHub Actions CI에서 Gradle clean build 및 Docker Hub Push를 수행합니다.
     - CD 워크플로우가 EC2로 `deploy.sh`와 설정을 전달해 Docker Compose 재기동, Certbot 자동 갱신 및 Nginx 재로드까지 수행합니다.
 
-## 7. 활용한 데이터 출처
+## 8. 활용한 데이터 출처
 
 - 문화 빅데이터
   플랫폼: [공공체육시설 프로그램 정보](https://www.bigdata-culture.kr/bigdata/user/data_market/detail.do?id=c3b8fb69-307d-4ae7-ab42-d0314c89ef47)

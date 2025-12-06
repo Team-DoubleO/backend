@@ -26,32 +26,30 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
   public Slice<ProgramInfoResponse> searchPrograms(
       ProgramInfoServiceRequest req,
       Long pageSize,
-      Long lastProgramId
+      Long lastProgramId,
+      Double lastDistance
   ) {
 
     QProgram p = program;
     BooleanBuilder where = new BooleanBuilder();
 
-    if (lastProgramId != null) {
-      where.and(p.id.lt(lastProgramId));
-    }
-
-    NumberExpression<Double> distanceKm = null;
-    double radius = 30.0;
+    NumberExpression<Double> distance ;
+    double radius = 10.0;
 
     if (req.latitude() != null && req.longitude() != null) {
-
       where.and(p.facility.fcltyLa.isNotNull())
           .and(p.facility.fcltyLo.isNotNull());
 
-      distanceKm = haversineKm(
+      distance = haversineKm(
           req.latitude(),
           req.longitude(),
           p.facility.fcltyLa,
           p.facility.fcltyLo
       );
 
-      where.and(distanceKm.loe(radius));
+      where.and(distance.loe(radius));
+    } else {
+      distance = null;
     }
 
     if (req.gender() != null && !req.gender().isBlank()) {
@@ -67,26 +65,31 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
 
     if (req.favorites() != null && !req.favorites().isEmpty()) {
       BooleanBuilder fav = new BooleanBuilder();
-      for (String f : req.favorites()) {
-        fav.or(p.progrmTyNmDetail.contains(f));
-      }
+      req.favorites().forEach(f -> fav.or(p.progrmTyNmDetail.contains(f)));
       where.and(fav);
     }
 
     if (req.weekday() != null && !req.weekday().isEmpty()) {
-      BooleanBuilder day = new BooleanBuilder();
-      for (String w : req.weekday()) {
-        day.or(p.progrmEstblWkdayNm.contains(w));
-      }
-      where.and(day);
+      BooleanBuilder dayBuilder = new BooleanBuilder();
+      req.weekday().forEach(w -> dayBuilder.or(p.progrmEstblWkdayNm.contains(w)));
+      where.and(dayBuilder);
     }
 
     if (req.startTime() != null && !req.startTime().isEmpty()) {
       BooleanBuilder time = new BooleanBuilder();
-      for (String t : req.startTime()) {
-        time.or(p.progrmEstblTiznValue.contains(t));
-      }
+      req.startTime().forEach(t -> time.or(p.progrmEstblTiznValue.contains(t)));
       where.and(time);
+    }
+
+    if (lastDistance != null && lastProgramId != null && distance != null) {
+      BooleanBuilder cursor = new BooleanBuilder();
+
+      cursor.or(distance.gt(lastDistance));
+      cursor.or(
+          distance.eq(lastDistance).and(p.id.gt(lastProgramId))
+      );
+
+      where.and(cursor);
     }
 
     var query = queryFactory
@@ -97,11 +100,12 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
             p.progrmEstblTiznValue,
             p.facility.fcltyNm,
             p.progrmTyNm,
-            p.progrmTyNmDetail
+            p.progrmTyNmDetail,
+            distance
         )
         .from(p)
         .where(where)
-        .orderBy(p.id.desc());
+        .orderBy(distance.asc(), p.id.asc());
 
     var tuples = query
         .limit(pageSize + 1)
@@ -115,11 +119,13 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
             t.get(p.progrmEstblTiznValue),
             t.get(p.facility.fcltyNm),
             t.get(p.progrmTyNm),
-            t.get(p.progrmTyNmDetail)
+            t.get(p.progrmTyNmDetail),
+            t.get(distance)
         ))
         .toList();
 
     boolean hasNext = content.size() > pageSize;
+
     if (hasNext) {
       content = content.subList(0, pageSize.intValue());
     }
@@ -128,8 +134,7 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
   }
 
   private NumberExpression<Double> haversineKm(
-      double srcLat,
-      double srcLon,
+      double srcLat, double srcLon,
       NumberPath<Double> latPath,
       NumberPath<Double> lonPath
   ) {

@@ -28,10 +28,11 @@ public class ProgramController implements ProgramControllerDocs {
   public ApiResponse<List<ProgramInfoResponse>> searchPrograms(
       @Valid @RequestBody ProgramInfoRequest request,
       @RequestParam("pageSize") Long pageSize,
-      @RequestParam(value = "lastProgramId", required = false) Long lastProgramId
+      @RequestParam(value = "lastProgramId", required = false) Long lastProgramId,
+      @RequestParam(value = "lastDistance", required = false) Double lastDistance
   ) {
     List<ProgramInfoResponse> responses = programService
-        .searchPrograms(request.toServiceRequest(), pageSize, lastProgramId);
+        .searchPrograms(request.toServiceRequest(), pageSize, lastProgramId, lastDistance);
     return ApiResponse.success(responses);
   }
 

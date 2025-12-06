@@ -6,5 +6,5 @@ import org.springframework.data.domain.Slice;
 
 public interface ProgramRepositoryCustom {
 
-  Slice<ProgramInfoResponse> searchPrograms(ProgramInfoServiceRequest req, Long pageSize, Long lastProgramId);
+  Slice<ProgramInfoResponse> searchPrograms(ProgramInfoServiceRequest req, Long pageSize, Long lastProgramId, Double lastDistance);
 }

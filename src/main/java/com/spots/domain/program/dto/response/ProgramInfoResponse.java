@@ -9,7 +9,8 @@ public record ProgramInfoResponse(
     String startTime,
     String facility,
     String category,
-    String subCategory
+    String subCategory,
+    Double distance
 ) {
 
 }

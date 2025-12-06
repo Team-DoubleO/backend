@@ -26,8 +26,13 @@ public class ProgramService {
   private final FacilityRepository facilityRepository;
   private final TransitRepository transitRepository;
 
-  public List<ProgramInfoResponse> searchPrograms(ProgramInfoServiceRequest request, Long pageSize, Long lastProgramId) {
-    return programRepository.searchPrograms(request, pageSize, lastProgramId).getContent();
+  public List<ProgramInfoResponse> searchPrograms(
+      ProgramInfoServiceRequest request,
+      Long pageSize,
+      Long lastProgramId,
+      Double lastDistance
+  ) {
+    return programRepository.searchPrograms(request, pageSize, lastProgramId, lastDistance).getContent();
   }
 
   public ProgramDetailInfoResponse getProgram(Long programId) {

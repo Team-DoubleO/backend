@@ -18,7 +18,7 @@ public class RecommendService {
 
   public WeeklyRecommendResponse recommendWeeklyRoutine(UserInfoServiceRequest request) {
     List<ProgramInfoResponse> programs = programRepository
-        .searchPrograms(request.toProgramInfoServiceRequest(), 30L, null).getContent();
+        .searchPrograms(request.toProgramInfoServiceRequest(), 40L, null, null).getContent();
 
     RecommendLLMRequest llmRequest = RecommendLLMRequest.from(request, programs);
     return workoutLLMService.createWeeklyPlan(llmRequest);

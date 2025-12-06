@@ -129,7 +129,14 @@ public interface ProgramControllerDocs {
           example = "12212",
           required = false
       )
-      @RequestParam(value = "lastProgramId", required = false) Long lastProgramId
+      @RequestParam(value = "lastProgramId", required = false) Long lastProgramId,
+
+      @Parameter(
+          description = "무한스크롤 시 마지막으로 조회한 Program과의 거리. 첫 요청 시 null",
+          example = "5.4",
+          required = false
+      )
+      @RequestParam(value = "lastDistance", required = false) Double lastDistance
   );
 
   @Operation(

@@ -23,7 +23,7 @@ public class RecommendLLMService {
 
   public WeeklyRecommendResponse createWeeklyPlan(RecommendLLMRequest request) {
 
-    String promptText = loadPrompt("prompt/routine.prompt");
+    String promptText = loadPrompt("prompt/routineV2.prompt");
 
     String userMessage = """
         아래는 사용자 정보와 후보 운동 프로그램 목록입니다.

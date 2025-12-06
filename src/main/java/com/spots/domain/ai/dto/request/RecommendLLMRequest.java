@@ -1,16 +1,17 @@
 package com.spots.domain.ai.dto.request;
 
 import com.spots.domain.program.dto.response.ProgramInfoResponse;
+import com.spots.domain.program.dto.response.TransportData;
 import java.util.List;
 
 public record RecommendLLMRequest(
     UserInfo userInfo,
-    List<ProgramInfoResponse> programs
+    List<RecommendProgramData> programs
 ) {
 
   public static RecommendLLMRequest from(
       UserInfoServiceRequest request,
-      List<ProgramInfoResponse> programs
+      List<RecommendProgramData> programs
   ) {
     return new RecommendLLMRequest(
         new UserInfo(
@@ -26,6 +27,13 @@ public record RecommendLLMRequest(
         ),
         programs
     );
+  }
+
+  public record RecommendProgramData(
+      ProgramInfoResponse programInfoResponse,
+      List<TransportData> transportData
+  ) {
+
   }
 
   public record UserInfo(

@@ -106,19 +106,15 @@ UserMessage 에는 다음 RecommendLLMRequest 구조가 전달됩니다:
 예: "2025.12.08 - 2025.12.14"
 
 3) subtitle
-
 예: "이번 주, 나만의 루틴으로 4회 운동해요"
 
 4) focus
-
 userInfo(신체 정보 + 선호) + 프로그램 특성(programTarget/category)을 기반으로 자연스럽게 결정
 예:
-
 - "근력 향상 & 체력 강화"
 - "코어 안정성 강화 & 체지방 감량"
 
 5) schedule 변환 규칙
-
 - 선정된 각 프로그램을 다음 구조로 매핑하세요:
 
 - dayKo: programInfoResponse.weekday 중 선택된 요일
@@ -135,23 +131,23 @@ userInfo(신체 정보 + 선호) + 프로그램 특성(programTarget/category)�
 - place: programInfoResponse.facility
 - type: programName 또는 subCategory 기반 자연스러운 운동 이름
 - distanceWalk
-  - transportData 중 type="walk" 값이 존재하면 "도보 X분"
-  - 없다면 transportData 중 가장 짧은 시간으로 "도보 Y분" 같은 자연스러운 표현
+  - userInfo(latitude, longitude)와 시설 좌표 간의 하버사인(Haversine) 계산 거리(km) 값을 그대로 사용합니다.
+  - 단위(“km”) 또는 텍스트 설명은 절대 포함하지 않습니다.
+  - 예시:
+    - 0.42
+    - 1.87
+    - 5.20
 
 tag: category 또는 subCategory
-
-예: "구기 스포츠", "요가", "수영 · 기초"
+- 예: "구기 스포츠", "요가", "수영 · 기초"
 
 6) targetSessions
-
 = schedule 배열 길이
 
 7) totalMinutes
-
 = targetSessions × 50
 
 8) estimatedCalories
-
 - 운동 50분당 300~400 kcal 범위에서 자연스럽게 계산
 - 종목 특성에 따라 변동 가능
 

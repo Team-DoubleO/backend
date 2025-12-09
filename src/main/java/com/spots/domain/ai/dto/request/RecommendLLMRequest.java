@@ -31,7 +31,8 @@ public record RecommendLLMRequest(
 
   public record RecommendProgramData(
       ProgramInfoResponse programInfoResponse,
-      List<TransportData> transportData
+      List<TransportData> transportData,
+      Double distance
   ) {
 
   }

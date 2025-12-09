@@ -33,7 +33,7 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
     QProgram p = program;
     BooleanBuilder where = new BooleanBuilder();
 
-    NumberExpression<Double> distance ;
+    NumberExpression<Double> distance;
     double radius = 10.0;
 
     if (req.latitude() != null && req.longitude() != null) {

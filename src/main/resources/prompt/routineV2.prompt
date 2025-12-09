@@ -50,7 +50,8 @@ UserMessage 에는 다음 RecommendLLMRequest 구조가 전달됩니다:
 "transportName": "",
 "transportTime": ""
 }
-]
+],
+"distance": 0.0
 }
 ]
 }
@@ -59,6 +60,7 @@ UserMessage 에는 다음 RecommendLLMRequest 구조가 전달됩니다:
 
 - programInfoResponse: 해당 운동 프로그램의 기본 + 상세 정보
 - transportData: 해당 시설까지의 이동 시간 정보(도보/버스 등)
+- distance: Haversine 거리(km), 소수점 둘째 자리까지 반올림된 Double형 데이터
 
 ────────────────────────────────────────
 
@@ -96,7 +98,7 @@ UserMessage 에는 다음 RecommendLLMRequest 구조가 전달됩니다:
 1. 사용자 favorites 와 category/subCategory가 일치하는 프로그램
 2. 사용자 weekday 및 startTime 조건과 실제 프로그램 시간이 맞는 프로그램
 3. 사용자 나이·BMI에 적합한 programTarget
-4. transportData 기반으로 이동이 현실적인 프로그램 우선 선택
+4. transportData와 distance 값 기반으로 현실적인 이동 가능성 고려
 
 동일 종목·시설 반복 가능하되, 다양하게 구성해주세요.
 
@@ -131,8 +133,8 @@ userInfo(신체 정보 + 선호) + 프로그램 특성(programTarget/category)�
 - place: programInfoResponse.facility
 - type: programName 또는 subCategory 기반 자연스러운 운동 이름
 - distanceWalk
-  - userInfo(latitude, longitude)와 시설 좌표 간의 하버사인(Haversine) 계산 거리(km) 값을 그대로 사용합니다.
-  - 단위(“km”) 또는 텍스트 설명은 절대 포함하지 않습니다.
+  - RecommendLLMRequest.programs[].distance 값을 그대로 사용한다
+  - 단위(“km”) 또는 텍스트 설명은 절대 포함하지 않습니다. 즉, 숫자(Double)만 출력
   - 예시:
     - 0.42
     - 1.87

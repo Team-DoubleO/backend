@@ -15,7 +15,7 @@ public interface TransitRepository extends JpaRepository<FacilityTransit, Long> 
       SELECT DISTINCT ON (rank) 
         pbtrnsp_fclty_sdiv_nm AS transportType,
         bstp_subwayst_nm      AS transportName,
-        (wlkg_mvmn_time / 60) AS transportTime
+        (wlkg_mvmn_time / 60) + 1 AS transportTime
       FROM facility_transit
       WHERE facility_id = :facilityId AND rank IN (1, 2)
       ORDER BY rank, wlkg_mvmn_time ASC

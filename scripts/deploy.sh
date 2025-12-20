@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # =================================================================
-#  Retrip 프로젝트 배포 및 SSL 인증서 자동화 스크립트
+#  FitFinder 프로젝트 배포 및 SSL 인증서 자동화 스크립트
 # =================================================================
 
 echo "환경 설정을 시작합니다..."
@@ -11,6 +11,96 @@ if [ ! -f .env ]; then
 fi
 
 export $(grep -v '^#' .env | xargs)
+
+# ===============================================================
+# 📊 디스크 & Discord 설정
+# ===============================================================
+DISK_WARN_THRESHOLD=80
+DISK_CLEAN_THRESHOLD=90
+
+send_discord() {
+    local TITLE="$1"
+    local BODY="$2"
+
+    curl -s -X POST \
+      -H "Content-Type: application/json" \
+      -d "{
+        \"content\": \"**${TITLE}**\n\n${BODY}\"
+      }" \
+      "$DISCORD_WEBHOOK_URL" > /dev/null
+}
+
+get_root_disk_usage() {
+    df / | awk 'NR==2 {print $5}' | sed 's/%//'
+}
+
+get_root_disk_status() {
+    df -h | grep "/dev/root"
+}
+
+get_docker_image_status() {
+    docker system df | sed '1d'
+}
+
+notify_disk_status() {
+    local USAGE="$1"
+
+    send_discord "📊 서버 디스크 상태 리포트" \
+"🖥️ **EC2 Root Disk**
+\`\`\`
+$(get_root_disk_status)
+\`\`\`
+
+🐳 **Docker Images**
+\`\`\`
+$(get_docker_image_status)
+\`\`\`
+
+📈 **Disk Usage**: **${USAGE}%**"
+}
+
+handle_disk_overflow() {
+    local USAGE="$1"
+
+    send_discord "🚨 디스크 임계치 초과" \
+"❌ 디스크 사용량이 **${USAGE}%** 를 초과했습니다.
+
+🧹 **자동 복구 진행**
+- docker compose down
+- docker system prune -a --volumes
+- 이미지 재배포 시작"
+
+    $DOCKER_COMPOSE down
+    docker system prune -a --volumes -f
+    $DOCKER_COMPOSE pull spots-app
+    $DOCKER_COMPOSE up -d --force-recreate
+
+    send_discord "✅ 디스크 정리 및 재배포 완료" \
+"📦 **정리 후 Disk**
+\`\`\`
+$(get_root_disk_status)
+\`\`\`
+
+🐳 **Docker 상태**
+\`\`\`
+$(get_docker_image_status)
+\`\`\`"
+}
+
+check_disk_and_notify() {
+    local USAGE
+    USAGE=$(get_root_disk_usage)
+
+    notify_disk_status "$USAGE"
+
+    if [ "$USAGE" -ge "$DISK_CLEAN_THRESHOLD" ]; then
+        handle_disk_overflow "$USAGE"
+    elif [ "$USAGE" -ge "$DISK_WARN_THRESHOLD" ]; then
+        send_discord "⚠️ 디스크 사용량 경고" \
+"📈 현재 디스크 사용량이 **${USAGE}%** 입니다.
+조만간 Docker 이미지 정리가 필요할 수 있습니다."
+    fi
+}
 
 MAIN_DOMAIN="sspots.site"
 CERT_FILE_PATH="./data/certbot/conf/live/$MAIN_DOMAIN/fullchain.pem"

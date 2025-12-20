@@ -122,6 +122,11 @@ sudo mkdir -p $NGINX_CONF_DIR
 sudo mkdir -p ./data/certbot/conf
 sudo mkdir -p ./data/certbot/www
 
+# ===============================================================
+# 🔍 배포 전 디스크 상태 확인
+# ===============================================================
+check_disk_and_notify
+
 check_certificate() {
     # sudo 권한으로 파일 존재 확인
     if sudo [ -f "$CERT_FILE_PATH" ]; then

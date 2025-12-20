@@ -16,12 +16,18 @@ spring:
         format_sql: true
     open-in-view: false
 
+  # Spring AI Config
   ai:
     openai:
       api-key: ${OPENAI.API-KEY}
       chat:
         options:
           model: gpt-4o
+
+  # Async Config
+  mvc:
+    async:
+      request-timeout: 150000 # 2m 30s
 
 server:
   forward-headers-strategy: framework

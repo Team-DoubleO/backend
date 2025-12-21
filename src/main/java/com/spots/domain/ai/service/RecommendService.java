@@ -1,5 +1,8 @@
 package com.spots.domain.ai.service;
 
+import static java.math.BigDecimal.valueOf;
+import static java.math.RoundingMode.HALF_UP;
+
 import com.spots.domain.ai.dto.request.RecommendLLMRequest;
 import com.spots.domain.ai.dto.request.RecommendLLMRequest.RecommendProgramData;
 import com.spots.domain.ai.dto.request.UserInfoServiceRequest;
@@ -10,22 +13,18 @@ import com.spots.domain.program.dto.response.TransportData;
 import com.spots.domain.program.entity.Program;
 import com.spots.domain.program.repository.ProgramRepository;
 import com.spots.domain.program.service.ProgramService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.math.BigDecimal.valueOf;
-import static java.math.RoundingMode.HALF_UP;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 @Service
 @RequiredArgsConstructor
@@ -167,3 +166,4 @@ public class RecommendService {
         .doubleValue();
   }
 }
+

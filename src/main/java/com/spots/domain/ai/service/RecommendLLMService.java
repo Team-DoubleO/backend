@@ -1,22 +1,24 @@
 package com.spots.domain.ai.service;
 
+import static com.spots.global.exception.Code.INVALID_JSON_RESPONSE;
+import static com.spots.global.exception.Code.JSON_CONVERSION_ERROR;
+import static com.spots.global.exception.Code.LLM_INTERRUPT_ERROR;
+import static com.spots.global.exception.Code.PROMPT_LOADING_ERROR;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spots.domain.ai.dto.request.RecommendLLMRequest;
 import com.spots.domain.ai.dto.response.WeeklyRecommendResponse;
 import com.spots.global.exception.CustomException;
+import java.io.InputStream;
+import java.util.concurrent.Semaphore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
-
-import java.io.InputStream;
-import java.util.concurrent.Semaphore;
-
-import static com.spots.global.exception.Code.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Service
 @RequiredArgsConstructor

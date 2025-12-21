@@ -4,12 +4,13 @@ import com.spots.domain.ai.dto.request.UserInfoRequest;
 import com.spots.domain.ai.dto.response.WeeklyRecommendResponse;
 import com.spots.domain.ai.service.RecommendService;
 import com.spots.global.exception.ApiResponse;
-import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/recommend")
@@ -26,4 +27,5 @@ public class RecommendController {
         .recommendWeeklyRoutine(request.toServiceRequest())
         .thenApply(ApiResponse::success);
   }
+
 }

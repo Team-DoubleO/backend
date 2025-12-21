@@ -23,6 +23,7 @@ spring:
       chat:
         options:
           model: gpt-4o
+          temperature: 1.0
 
   # Async Config
   mvc:

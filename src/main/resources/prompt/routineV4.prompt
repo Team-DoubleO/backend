@@ -42,6 +42,8 @@ Constraint: Output ONLY raw JSON. No markdown, no comments.
    - totalMinutes: targetSessions * 50
    - estimatedCalories: 300-400 kcal per session
    - tag: Translate category to Korean if needed (e.g., 'HEALTH' -> '헬스').
+- type: Derive a natural **Korean sport name** (e.g., '수영', '헬스', '요가') from 'programName' or 'subCategory'.
+     **CRITICAL:** DO NOT use specific internal class codes or IDs (e.g., 'WorkerA18', 'MorningClass_B'). Simplify it to the main sport name.
 
 4. Formatting:
    - Schedule MUST be sorted by day (Mon -> Sun).

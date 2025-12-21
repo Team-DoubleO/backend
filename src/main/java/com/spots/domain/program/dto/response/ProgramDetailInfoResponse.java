@@ -1,5 +1,6 @@
 package com.spots.domain.program.dto.response;
 
+import static com.spots.domain.program.dto.response.TargetGroup.parseToString;
 import static com.spots.domain.program.entity.Program.splitAndSortDays;
 
 import com.spots.domain.facility.entity.Facility;
@@ -24,7 +25,7 @@ public record ProgramDetailInfoResponse(
 
     return new ProgramDetailInfoResponse(
         program.getProgrmNm(),
-        program.getProgrmTrgetNm(),
+        parseToString(program.getProgrmTrgetCategory()),
         splitAndSortDays(program.getProgrmEstblWkdayNm()),
         program.getProgrmEstblTiznValue(),
         program.getProgrmPrc().intValue(),

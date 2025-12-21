@@ -3,7 +3,6 @@
 # =================================================================
 #  FitFinder 프로젝트 배포 및 SSL 인증서 자동화 스크립트
 # =================================================================
-
 echo "환경 설정을 시작합니다..."
 if [ ! -f .env ]; then
     echo ".env 파일이 없습니다. 스크립트를 중단합니다."
@@ -12,22 +11,45 @@ fi
 
 export $(grep -v '^#' .env | xargs)
 
-# ===============================================================
-# 📊 디스크 & Discord 설정
-# ===============================================================
+if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+    echo "❌ DISCORD_WEBHOOK_URL 이 설정되지 않았습니다."
+    exit 1
+fi
+
+MAIN_DOMAIN="sspots.site"
+CERT_FILE_PATH="./data/certbot/conf/live/$MAIN_DOMAIN/fullchain.pem"
+NGINX_CONF_DIR="./nginx/conf.d"
+NGINX_CONTAINER_NAME="nginx"
+WHITELIST_FILE="$NGINX_CONF_DIR/allowed_ips.rules"
+
 DISK_WARN_THRESHOLD=80
 DISK_CLEAN_THRESHOLD=90
 
 send_discord() {
-    local TITLE="$1"
-    local BODY="$2"
+  local TITLE="$1"
+  local BODY="$2"
 
-    curl -s -X POST \
-      -H "Content-Type: application/json" \
-      -d "{
-        \"content\": \"**${TITLE}**\n\n${BODY}\"
-      }" \
-      "$DISCORD_WEBHOOK_URL" > /dev/null
+  if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+    echo "DISCORD_WEBHOOK_URL is empty"
+    return 1
+  fi
+
+  local payload
+  payload=$(jq -nc \
+    --arg content "**${TITLE}**
+
+${BODY}" \
+    '{content: $content}')
+
+  if ! curl --fail -sS \
+    -H "Content-Type: application/json" \
+    -d "$payload" \
+    "$DISCORD_WEBHOOK_URL"; then
+    echo "Discord notify failed"
+    return 1
+  fi
+
+  return 0
 }
 
 get_root_disk_usage() {
@@ -102,12 +124,6 @@ check_disk_and_notify() {
     fi
 }
 
-MAIN_DOMAIN="sspots.site"
-CERT_FILE_PATH="./data/certbot/conf/live/$MAIN_DOMAIN/fullchain.pem"
-NGINX_CONF_DIR="./nginx/conf.d"
-NGINX_CONTAINER_NAME="nginx"
-WHITELIST_FILE="$NGINX_CONF_DIR/allowed_ips.rules"
-
 if command -v docker-compose &> /dev/null; then
     DOCKER_COMPOSE="docker-compose"
 elif docker compose version &> /dev/null; then
@@ -121,11 +137,6 @@ echo "Docker Compose 명령어: $DOCKER_COMPOSE"
 sudo mkdir -p $NGINX_CONF_DIR
 sudo mkdir -p ./data/certbot/conf
 sudo mkdir -p ./data/certbot/www
-
-# ===============================================================
-# 🔍 배포 전 디스크 상태 확인
-# ===============================================================
-check_disk_and_notify
 
 check_certificate() {
     # sudo 권한으로 파일 존재 확인
@@ -214,6 +225,11 @@ else
     fi
 fi
 
+# ===============================================================
+# 🔍 배포 전 디스크 체크
+# ===============================================================
+check_disk_and_notify
+
 echo "최종 운영 설정을 적용하고 모든 서비스를 시작합니다."
 
 echo "운영용 Nginx 설정을 적용합니다."
@@ -230,6 +246,12 @@ $DOCKER_COMPOSE up -d
 
 echo "Nginx 설정을 리로드합니다..."
 $DOCKER_COMPOSE exec $NGINX_CONTAINER_NAME nginx -s reload
+
+send_discord "🎉 배포 완료" \
+"✅ 최신 이미지로 서비스가 배포되었습니다.
+
+🌐 **Service URL**
+https://${MAIN_DOMAIN}"
 
 echo "================================================================="
 echo "배포가 성공적으로 완료되었습니다!"

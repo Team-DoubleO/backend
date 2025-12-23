@@ -25,6 +25,14 @@ WHITELIST_FILE="$NGINX_CONF_DIR/allowed_ips.rules"
 DISK_WARN_THRESHOLD=80
 DISK_CLEAN_THRESHOLD=90
 
+REQUIRED_DOMAINS=(
+  sspots.site
+  www.sspots.site
+  api.sspots.site
+  grafana.sspots.site
+  prometheus.sspots.site
+)
+
 send_discord() {
   local TITLE="$1"
   local BODY="$2"
@@ -139,20 +147,25 @@ sudo mkdir -p ./data/certbot/conf
 sudo mkdir -p ./data/certbot/www
 
 check_certificate() {
-    # sudo 권한으로 파일 존재 확인
     if sudo [ -f "$CERT_FILE_PATH" ]; then
         echo "기존 SSL 인증서를 찾았습니다: $CERT_FILE_PATH"
 
-        # sudo 권한으로 openssl 실행
-        if sudo openssl x509 -checkend 2592000 -noout -in "$CERT_FILE_PATH" > /dev/null 2>&1; then
-            echo "인증서가 유효합니다. (30일 이상 남음)"
-            return 0
-        else
-            echo "인증서가 30일 이내에 만료됩니다. 갱신이 필요합니다."
+        if ! sudo openssl x509 -checkend 2592000 -noout -in "$CERT_FILE_PATH" > /dev/null 2>&1; then
+            echo "❌ 인증서가 30일 이내에 만료됩니다."
             return 1
         fi
+
+        echo "✔ 인증서 유효 기간 정상"
+
+        if ! check_certificate_domains; then
+            echo "❌ 인증서에 필요한 도메인이 모두 포함되어 있지 않습니다."
+            return 1
+        fi
+
+        echo "✅ 인증서 유효 + 도메인 구성 정상"
+        return 0
     else
-        echo "SSL 인증서가 존재하지 않습니다."
+        echo "❌ SSL 인증서가 존재하지 않습니다."
         return 1
     fi
 }

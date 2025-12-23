@@ -45,6 +45,8 @@ services:
       - ./data/certbot/www:/var/www/certbot
     depends_on:
       - spots-app
+      - prometheus
+      - grafana
     networks:
       - spots-net
     restart: always
@@ -99,6 +101,7 @@ services:
 
 volumes:
   dbdata:
+  grafana-storage:
   certbot_data:
 
 networks:

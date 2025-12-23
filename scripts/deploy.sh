@@ -146,98 +146,80 @@ sudo mkdir -p $NGINX_CONF_DIR
 sudo mkdir -p ./data/certbot/conf
 sudo mkdir -p ./data/certbot/www
 
-check_certificate() {
-    if sudo [ -f "$CERT_FILE_PATH" ]; then
-        echo "기존 SSL 인증서를 찾았습니다: $CERT_FILE_PATH"
+check_certificate_domains() {
+  local cert="$CERT_FILE_PATH"
 
-        if ! sudo openssl x509 -checkend 2592000 -noout -in "$CERT_FILE_PATH" > /dev/null 2>&1; then
-            echo "❌ 인증서가 30일 이내에 만료됩니다."
-            return 1
-        fi
+  echo "🔍 인증서 SAN 검사 중..."
 
-        echo "✔ 인증서 유효 기간 정상"
+  local san_list
+  san_list=$(sudo openssl x509 -in "$cert" -noout -ext subjectAltName | tr ',' '\n')
 
-        if ! check_certificate_domains; then
-            echo "❌ 인증서에 필요한 도메인이 모두 포함되어 있지 않습니다."
-            return 1
-        fi
-
-        echo "✅ 인증서 유효 + 도메인 구성 정상"
-        return 0
-    else
-        echo "❌ SSL 인증서가 존재하지 않습니다."
-        return 1
+  for domain in "${REQUIRED_DOMAINS[@]}"; do
+    if ! echo "$san_list" | grep -q "DNS:$domain"; then
+      echo "❌ SAN 누락: $domain"
+      return 1
     fi
+  done
+
+  echo "✅ 모든 도메인이 인증서에 포함되어 있습니다."
+  return 0
+}
+
+check_certificate_validity() {
+  if sudo openssl x509 -checkend 2592000 -noout -in "$CERT_FILE_PATH"; then
+    echo "✔ 인증서 유효 기간 정상 (30일 이상)"
+    return 0
+  else
+    echo "⚠ 인증서 만료 임박"
+    return 1
+  fi
 }
 
 renew_certificate() {
-    echo "인증서 갱신을 시도합니다..."
-    $DOCKER_COMPOSE run --rm certbot renew
-
-    if [ $? -eq 0 ]; then
-        echo "인증서 갱신 성공!"
-        return 0
-    else
-        echo "인증서 갱신 실패. 새로 발급을 시도합니다."
-        return 1
-    fi
+  echo "🔄 인증서 갱신 시도"
+  $DOCKER_COMPOSE run --rm certbot renew
 }
 
 issue_new_certificate() {
-    echo "새로운 SSL 인증서 발급을 시작합니다."
+  echo "🆕 인증서 신규/재발급(certonly) 시작"
 
-    echo "인증서 발급을 위해 임시 Nginx 설정을 적용합니다."
-    sudo cp ./nginx-cert-setup.conf $NGINX_CONF_DIR/default.conf
+  echo "➡ 발급용 nginx 설정 적용"
+  cp ./nginx-cert-setup.conf "$NGINX_CONF_DIR/default.conf"
 
-    $DOCKER_COMPOSE up -d nginx
+  $DOCKER_COMPOSE up -d nginx
+  sleep 8
 
-    echo "Nginx가 시작될 때까지 10초 대기합니다..."
-    sleep 10
+  $DOCKER_COMPOSE run --rm certbot certonly \
+    --webroot -w /var/www/certbot \
+    --force-renewal \
+    -d sspots.site \
+    -d www.sspots.site \
+    -d api.sspots.site \
+    -d grafana.sspots.site \
+    -d prometheus.sspots.site \
+    --email "$CERTBOT_EMAIL" \
+    --agree-tos \
+    --no-eff-email
 
-    echo "Certbot으로 SSL 인증서를 요청합니다..."
-    $DOCKER_COMPOSE run --rm certbot certonly \
-      --webroot --webroot-path=/var/www/certbot \
-      -d sspots.site \
-      -d www.sspots.site \
-      -d api.sspots.site \
-      -d grafana.sspots.site \
-      -d prometheus.sspots.site \
-      --email $CERTBOT_EMAIL --agree-tos --no-eff-email
-
-    if [ $? -ne 0 ]; then
-        echo "SSL 인증서 발급에 실패했습니다."
-        echo "Let's Encrypt 발급 제한에 걸렸을 가능성이 있습니다."
-        echo "다음 중 하나를 시도해보세요:"
-        echo "1. 기존 인증서 파일을 수동으로 복사"
-        echo "2. 발급 제한 해제까지 대기"
-        echo "3. 스테이징 환경에서 테스트"
-
-        $DOCKER_COMPOSE logs nginx
-        return 1
-    fi
-
-    echo "SSL 인증서 발급 성공!"
-    $DOCKER_COMPOSE down
-    return 0
+  echo "✅ 인증서 발급 완료"
 }
 
+if [ -f "$CERT_FILE_PATH" ]; then
+  echo "🔐 기존 SSL 인증서를 찾았습니다: $CERT_FILE_PATH"
 
-if check_certificate; then
+  if ! check_certificate_domains; then
+    echo "🚨 SAN 누락 → 인증서 재발급 필요"
+    issue_new_certificate
+  elif ! check_certificate_validity; then
+    echo "⏰ 만료 임박 → 갱신 시도"
+    renew_certificate
+  else
+    echo "✅ 인증서 유효 + 도메인 구성 정상"
     echo "기존 인증서를 사용합니다."
+  fi
 else
-    echo "인증서 처리가 필요합니다."
-
-    if [ -f "$CERT_FILE_PATH" ]; then
-        if ! renew_certificate; then
-            echo "갱신 실패. 새 인증서 발급을 건너뜁니다."
-            echo "기존 인증서를 그대로 사용합니다."
-        fi
-    else
-        if ! issue_new_certificate; then
-            echo "인증서 발급 실패. HTTP로 서비스를 시작합니다."
-            echo "수동으로 인증서를 설정한 후 다시 배포하세요."
-        fi
-    fi
+  echo "❌ 인증서 없음 → 신규 발급"
+  issue_new_certificate
 fi
 
 # ===============================================================

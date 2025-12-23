@@ -187,6 +187,8 @@ issue_new_certificate() {
       -d sspots.site \
       -d www.sspots.site \
       -d api.sspots.site \
+      -d grafana.sspots.site \
+      -d prometheus.sspots.site \
       --email $CERTBOT_EMAIL --agree-tos --no-eff-email
 
     if [ $? -ne 0 ]; then

@@ -30,5 +30,24 @@ spring:
     async:
       request-timeout: 150000 # 2m 30s
 
+# prometheus & actuator
+management:
+  endpoints:
+    shutdown:
+      enabled: false
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: fitfinder-api
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
 server:
   forward-headers-strategy: framework

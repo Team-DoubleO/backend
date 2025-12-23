@@ -51,3 +51,7 @@ management:
 
 server:
   forward-headers-strategy: framework
+  # Tomcat Metric Setting
+  tomcat:
+    mbeanregistry:
+      enabled: true

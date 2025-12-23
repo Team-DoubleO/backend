@@ -28,6 +28,7 @@ jobs:
           cp nginx/nginx-prod.conf deploy-files/
           cp nginx/nginx-cert-setup.conf deploy-files/
           cp docker-compose.yml deploy-files/
+          cp src/main/resources/prometheus.yml deploy-files/
           cp .env deploy-files/
 
       - name: 필요한 파일들을 EC2 서버로 전송

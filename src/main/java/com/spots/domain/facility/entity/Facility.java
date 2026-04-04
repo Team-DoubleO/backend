@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.locationtech.jts.geom.Point;
 
 @Getter
 @Entity
@@ -53,6 +54,9 @@ public class Facility {
   private Double fcltyLa;
 
   private Double fcltyLo;
+
+  @Column(columnDefinition = "geometry(Point, 4326)")
+  private Point location;  // DB의 geometry 컬럼과 매핑
 
   @OneToMany(mappedBy = "facility", fetch = FetchType.LAZY)
   private List<Program> programs;

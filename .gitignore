@@ -43,4 +43,4 @@ out/
 application-secret.yml
 /src/main/generated/
 /src/main/generated_tests/
-/src/main/resources/static/docs/
+.claude

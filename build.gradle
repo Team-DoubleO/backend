@@ -71,6 +71,9 @@ dependencies {
 
     // AI
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+    // Spatial
+    implementation 'org.hibernate.orm:hibernate-spatial'
 }
 
 dependencyManagement {

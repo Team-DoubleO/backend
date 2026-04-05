@@ -55,8 +55,8 @@ public class Facility {
 
   private Double fcltyLo;
 
-  @Column(columnDefinition = "geometry(Point, 4326)")
-  private Point location;  // DB의 geometry 컬럼과 매핑
+  @Column(columnDefinition = "geography(Point, 4326)")
+  private Point location;
 
   @OneToMany(mappedBy = "facility", fetch = FetchType.LAZY)
   private List<Program> programs;

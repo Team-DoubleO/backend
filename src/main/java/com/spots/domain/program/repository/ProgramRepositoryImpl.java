@@ -6,13 +6,16 @@ import static com.spots.domain.program.entity.QProgram.program;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.spots.domain.program.dto.request.ProgramInfoServiceRequest;
 import com.spots.domain.program.dto.response.ProgramInfoResponse;
 import com.spots.domain.program.entity.QProgram;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -34,20 +37,11 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
     BooleanBuilder where = new BooleanBuilder();
 
     NumberExpression<Double> distance;
-    double radius = 10.0;
 
     if (req.latitude() != null && req.longitude() != null) {
-      where.and(p.facility.fcltyLa.isNotNull())
-          .and(p.facility.fcltyLo.isNotNull());
-
-      distance = haversineKm(
-          req.latitude(),
-          req.longitude(),
-          p.facility.fcltyLa,
-          p.facility.fcltyLo
-      );
-
-      where.and(distance.loe(radius));
+      Point center = createPoint(req.longitude(), req.latitude());
+      where.and(stDWithin(p, center, 10000.0));
+      distance = stDistanceKm(p, center);
     } else {
       distance = null;
     }
@@ -133,16 +127,25 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
     return new SliceImpl<>(content, PageRequest.of(0, pageSize.intValue()), hasNext);
   }
 
-  private NumberExpression<Double> haversineKm(
-      double srcLat, double srcLon,
-      NumberPath<Double> latPath,
-      NumberPath<Double> lonPath
-  ) {
+  private Point createPoint(double longitude, double latitude) {
+    return new GeometryFactory(new PrecisionModel(), 4326)
+        .createPoint(new Coordinate(longitude, latitude));
+  }
+
+  private BooleanBuilder stDWithin(QProgram p, Point center, double meters) {
+    return new BooleanBuilder(
+        Expressions.booleanTemplate(
+            "function('st_dwithin', {0}, {1}, {2}) = true",
+            p.facility.location, center, meters
+        )
+    );
+  }
+
+  private NumberExpression<Double> stDistanceKm(QProgram p, Point center) {
     return Expressions.numberTemplate(
         Double.class,
-        "6371 * acos( cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) "
-        + "+ sin(radians({0})) * sin(radians({1})) )",
-        srcLat, latPath, lonPath, srcLon
+        "ST_Distance({0}, {1}) / 1000.0",
+        p.facility.location, center
     );
   }
 }

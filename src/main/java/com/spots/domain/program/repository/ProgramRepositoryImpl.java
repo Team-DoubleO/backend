@@ -3,7 +3,7 @@ package com.spots.domain.program.repository;
 import static com.spots.domain.program.entity.Program.splitAndSortDays;
 import static com.spots.domain.program.entity.QProgram.program;
 
-import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -23,6 +23,9 @@ import org.springframework.data.domain.SliceImpl;
 @RequiredArgsConstructor
 public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
 
+  private static final QProgram p = program;
+  public static final String ALL = "전체";
+
   private final JPAQueryFactory queryFactory;
 
   @Override
@@ -33,60 +36,9 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
       Double lastDistance
   ) {
 
-    QProgram p = program;
-    BooleanBuilder where = new BooleanBuilder();
+    NumberExpression<Double> distance = distanceExpression(req.longitude(), req.latitude());
 
-    NumberExpression<Double> distance;
-
-    if (req.latitude() != null && req.longitude() != null) {
-      Point center = createPoint(req.longitude(), req.latitude());
-      where.and(stDWithin(p, center, 10000.0));
-      distance = stDistanceKm(p, center);
-    } else {
-      distance = null;
-    }
-
-    if (req.gender() != null && !req.gender().isBlank()) {
-      where.and(
-          p.genderCategory.eq(req.gender())
-              .or(p.genderCategory.eq("전체"))
-      );
-    }
-
-    if (req.age() != null && !req.age().isBlank()) {
-      where.and(p.progrmTrgetCategory.contains(req.age()));
-    }
-
-    if (req.favorites() != null && !req.favorites().isEmpty()) {
-      BooleanBuilder fav = new BooleanBuilder();
-      req.favorites().forEach(f -> fav.or(p.progrmTyNmDetail.contains(f)));
-      where.and(fav);
-    }
-
-    if (req.weekday() != null && !req.weekday().isEmpty()) {
-      BooleanBuilder dayBuilder = new BooleanBuilder();
-      req.weekday().forEach(w -> dayBuilder.or(p.progrmEstblWkdayNm.contains(w)));
-      where.and(dayBuilder);
-    }
-
-    if (req.startTime() != null && !req.startTime().isEmpty()) {
-      BooleanBuilder time = new BooleanBuilder();
-      req.startTime().forEach(t -> time.or(p.progrmEstblTiznValue.contains(t)));
-      where.and(time);
-    }
-
-    if (lastDistance != null && lastProgramId != null && distance != null) {
-      BooleanBuilder cursor = new BooleanBuilder();
-
-      cursor.or(distance.gt(lastDistance));
-      cursor.or(
-          distance.eq(lastDistance).and(p.id.gt(lastProgramId))
-      );
-
-      where.and(cursor);
-    }
-
-    var query = queryFactory
+    var tuples = queryFactory
         .select(
             p.id,
             p.progrmNm,
@@ -98,10 +50,16 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
             distance
         )
         .from(p)
-        .where(where)
-        .orderBy(distance.asc(), p.id.asc());
-
-    var tuples = query
+        .where(
+            withinRadius(req.longitude(), req.latitude(), 10000.0),
+            genderEq(req.gender()),
+            ageContains(req.age()),
+            favoritesIn(req.favorites()),
+            weekdayIn(req.weekday()),
+            startTimeIn(req.startTime()),
+            cursorCondition(distance, lastDistance, lastProgramId)
+        )
+        .orderBy(distance.asc(), p.id.asc())
         .limit(pageSize + 1)
         .fetch();
 
@@ -127,25 +85,83 @@ public class ProgramRepositoryImpl implements ProgramRepositoryCustom {
     return new SliceImpl<>(content, PageRequest.of(0, pageSize.intValue()), hasNext);
   }
 
-  private Point createPoint(double longitude, double latitude) {
-    return new GeometryFactory(new PrecisionModel(), 4326)
-        .createPoint(new Coordinate(longitude, latitude));
-  }
-
-  private BooleanBuilder stDWithin(QProgram p, Point center, double meters) {
-    return new BooleanBuilder(
-        Expressions.booleanTemplate(
-            "function('st_dwithin', {0}, {1}, {2}) = true",
-            p.facility.location, center, meters
-        )
-    );
-  }
-
-  private NumberExpression<Double> stDistanceKm(QProgram p, Point center) {
+  private NumberExpression<Double> distanceExpression(Double longitude, Double latitude) {
+    if (longitude == null || latitude == null) {
+      return null;
+    }
     return Expressions.numberTemplate(
         Double.class,
         "ST_Distance({0}, {1}) / 1000.0",
-        p.facility.location, center
+        p.facility.location, createPoint(longitude, latitude)
     );
+  }
+
+  private BooleanExpression withinRadius(Double longitude, Double latitude, double meters) {
+    if (longitude == null || latitude == null) {
+      return null;
+    }
+    return Expressions.booleanTemplate(
+        "function('st_dwithin', {0}, {1}, {2}) = true",
+        p.facility.location, createPoint(longitude, latitude), meters
+    );
+  }
+
+  private BooleanExpression genderEq(String gender) {
+    if (gender == null || gender.isBlank()) {
+      return null;
+    }
+    return p.genderCategory.eq(gender).or(p.genderCategory.eq(ALL));
+  }
+
+  private BooleanExpression ageContains(String age) {
+    if (age == null || age.isBlank()) {
+      return null;
+    }
+    return p.progrmTrgetCategory.contains(age);
+  }
+
+  private BooleanExpression favoritesIn(List<String> favorites) {
+    if (favorites == null || favorites.isEmpty()) {
+      return null;
+    }
+    return favorites.stream()
+        .map(p.progrmTyNmDetail::contains)
+        .reduce(BooleanExpression::or)
+        .orElse(null);
+  }
+
+  private BooleanExpression weekdayIn(List<String> weekday) {
+    if (weekday == null || weekday.isEmpty()) {
+      return null;
+    }
+    return weekday.stream()
+        .map(p.progrmEstblWkdayNm::contains)
+        .reduce(BooleanExpression::or)
+        .orElse(null);
+  }
+
+  private BooleanExpression startTimeIn(List<String> startTime) {
+    if (startTime == null || startTime.isEmpty()) {
+      return null;
+    }
+    return startTime.stream()
+        .map(p.progrmEstblTiznValue::contains)
+        .reduce(BooleanExpression::or)
+        .orElse(null);
+  }
+
+  private BooleanExpression cursorCondition(
+      NumberExpression<Double> distance, Double lastDistance, Long lastProgramId
+  ) {
+    if (distance == null || lastDistance == null || lastProgramId == null) {
+      return null;
+    }
+    return distance.gt(lastDistance)
+        .or(distance.eq(lastDistance).and(p.id.gt(lastProgramId)));
+  }
+
+  private Point createPoint(double longitude, double latitude) {
+    return new GeometryFactory(new PrecisionModel(), 4326)
+        .createPoint(new Coordinate(longitude, latitude));
   }
 }

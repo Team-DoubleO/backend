@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 
 @Service
 @RequiredArgsConstructor
@@ -26,43 +25,28 @@ public class RecommendLLMService {
 
   private final ChatClient chatClient;
   private final ObjectMapper objectMapper;
+  public static final String REPLACE_CHARACTER = "user_data";
   private final int MAX_CONCURRENT_LLM_CALLS = 5;
   private final Semaphore llmSemaphore = new Semaphore(MAX_CONCURRENT_LLM_CALLS);
 
   @Value("classpath:prompt/routineV4.prompt")
   private Resource systemPromptResource;
 
+  @Value("classpath:prompt/user-message.prompt")
+  private Resource userPromptResource;
+
   public WeeklyRecommendResponse createWeeklyPlan(RecommendLLMRequest request) {
-    StopWatch stopWatch = new StopWatch("LLM_Generation_Task");
 
     try {
-      stopWatch.start("1. Semaphore Acquire");
       llmSemaphore.acquire();
-      stopWatch.stop();
-
-      stopWatch.start("2. Prompt & JSON Prep");
       String userJson = toJson(request);
-      String userMessage = """
-          아래는 사용자 정보와 후보 운동 프로그램 목록입니다.
-          이를 기반으로 일주일 운동 루틴 포토카드를 만들 JSON을 생성해주세요.
-          
-          <user_data>
-          %s
-          </user_data>
-          """.formatted(userJson);
-      stopWatch.stop();
 
-      stopWatch.start("3. LLM API Call (External)");
-      WeeklyRecommendResponse response = chatClient
+      return chatClient
           .prompt()
           .system(s -> s.text(systemPromptResource))
-          .user(userMessage)
+          .user(u -> u.text(userPromptResource).param(REPLACE_CHARACTER, userJson))
           .call()
           .entity(WeeklyRecommendResponse.class);
-      stopWatch.stop();
-
-      log.info(stopWatch.prettyPrint());
-      return response;
 
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();

@@ -9,7 +9,6 @@ import com.spots.domain.program.dto.response.TransportData;
 import com.spots.domain.program.dto.response.TransportDataRawWithFacility;
 import com.spots.domain.program.entity.Program;
 import com.spots.domain.program.repository.ProgramRepository;
-import com.spots.domain.program.service.ProgramService;
 import com.spots.domain.transport.repository.TransitRepository;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class RecommendService {
 
-  private final ProgramService programService;
   private final ProgramRepository programRepository;
   private final TransitRepository transitRepository;
   private final RecommendLLMService recommendLLMService;
-
-  private static final double EARTH_RADIUS_KM = 6371.0;
 
   @Async("llmExecutor")
   @Transactional(readOnly = true)
